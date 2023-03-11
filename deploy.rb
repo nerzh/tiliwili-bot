@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-ssh_key_name = "botasbot.bytehub.io"
+ssh_key_name = "bot.bytehub.io"
 system("eval \"$(ssh-agent -s)\" || true && ssh-add ~/.ssh/#{ssh_key_name}.pub || true && git reset --hard HEAD || true && git pull origin master")
 system("swift package resolve")
 #system("swift package update")
