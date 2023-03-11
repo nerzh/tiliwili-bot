@@ -58,7 +58,8 @@ public func configure(_ app: Application) throws {
     let bot: TGBot = .init(app: app, botId: tgApi)
     #if os(Linux)
         guard let tgIP = Environment.get("telegramm_ip") else { fatalError("Set telegramm_ip to .env.your_evironment") }
-        guard let tgWebhookUrl = Environment.get("telegramm_webhook_url") else { fatalError("Set telegramm_webhook_url to .env.your_evironment") }
+        guard let tgWebhookDomain = Environment.get("telegramm_webhook_domain") else { fatalError("Set telegramm_webhook_domain to .env.your_evironment") }
+        TGBotConnection = TGWebHookConnection(bot: bot, webHookURL: "\(tgWebhookDomain)/\(TGWebHookName)")
     #else
         TGBotConnection = TGLongPollingConnection(bot: bot)
     #endif
