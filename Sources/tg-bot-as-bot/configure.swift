@@ -38,6 +38,7 @@ public func configure(_ app: Application) throws {
     app.http.server.configuration.address = BindAddress.hostname(vaporIp, port: vaporPort)
 
     app.logger.logLevel = .notice
+    // MARK: POSTGRES
 //    app.bridges.logger.logLevel = .debug
 //    app.postgres.register(.psqlEnvironment)
 
@@ -49,10 +50,12 @@ public func configure(_ app: Application) throws {
 //        sleep(2)
 //        return c.eventLoop.next().future("OK")
 //    }
-
-    guard let tgApi = Environment.get("telegramm_api") else { fatalError("Set telegramm_api to .env.your_evironment") }
-    print(tgApi)
     
+    // MARK: MIGRATIONS
+//    try migrations(app)
+
+    // MARK: Bot
+    guard let tgApi = Environment.get("telegramm_api") else { fatalError("Set telegramm_api to .env.your_evironment") }
     /// set level of debug if you needed
     TGBot.log.logLevel = .error
     let bot: TGBot = .init(app: app, botId: tgApi)
@@ -61,6 +64,7 @@ public func configure(_ app: Application) throws {
         guard let tgWebhookDomain = Environment.get("telegramm_webhook_domain") else { fatalError("Set telegramm_webhook_domain to .env.your_evironment") }
         TGBotConnection = TGWebHookConnection(bot: bot, webHookURL: "\(tgWebhookDomain)/\(TGWebHookName)")
     #else
+        print(tgApi)
         TGBotConnection = TGLongPollingConnection(bot: bot)
     #endif
     Task {
@@ -69,8 +73,7 @@ public func configure(_ app: Application) throws {
     }
     
     
-
-//    try migrations(app)
+    // MARK: ROUTES
     try routes(app)
 }
 
