@@ -27,7 +27,7 @@ var TG_WEBHOOK_DOMAIN: String!
 func getAllEnvConstants() throws {
     let env = try Environment.detect()
     if env.name == "production" {
-        guard let variable_15 = Environment.get("telegramm_webhook_domain") else { fatalError("Set TG_WEBHOOK_DOMAIN to .env.\(env)") }
+        guard let variable_15 = Environment.get("TG_WEBHOOK_DOMAIN") else { fatalError("Set TG_WEBHOOK_DOMAIN to .env.\(env)") }
         TG_WEBHOOK_DOMAIN = variable_15
     } else {
         Domain = "http://127.0.0.1:8181"
