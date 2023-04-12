@@ -12,3 +12,4 @@ system("cd #{current_file_path}/get_congig_params && npm install")
 system("sudo pkill -9 -f #{app_name}")
 # system("/home/devton/swift/#{name}/.build/release/#{name} --env production > /home/devton/swift/#{name}/log.txt 2>&1 &")
 system("sudo supervisorctl restart #{app_name}-app")
+
