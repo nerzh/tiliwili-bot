@@ -40,7 +40,7 @@ let package = Package(
     ],
     dependencies: packageDependencies,
     targets: [
-        .target(
+        .executableTarget(
             name: name,
             dependencies: mainTarget,
             swiftSettings: [
