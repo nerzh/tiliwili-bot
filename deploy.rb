@@ -7,8 +7,6 @@ system("eval \"$(ssh-agent -s)\" || true && ssh-add ~/.ssh/#{ssh_key_name}.pub |
 system("swift package resolve")
 #system("swift package update")
 system("swift build -c release -Xswiftc -Ounchecked -Xswiftc -whole-module-optimization -Xcc -O2")
-#system("swift build -c debug")
-system("cd #{current_file_path}/get_congig_params && npm install")
 system("sudo pkill -9 -f #{app_name}")
 # system("/home/devton/swift/#{name}/.build/release/#{name} --env production > /home/devton/swift/#{name}/log.txt 2>&1 &")
 system("sudo supervisorctl restart #{app_name}-app")
