@@ -11,23 +11,21 @@ var packageDependencies: [Package.Dependency] = [
     .package(url: "https://github.com/nerzh/Bridges.git", branch: "master"),
     .package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")),
     .package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "1.2.0")),
-//    .package(name: "swift-crypto", url: "https://github.com/apple/swift-crypto", .upToNextMajor(from: "1.1.6")),
+    .package(url: "https://github.com/nerzh/telegram-vapor-bot.git", .upToNextMajor(from: "2.0.1")),
 ]
-
-#if os(Linux)
-    packageDependencies.append(.package(url: "https://github.com/nerzh/telegram-vapor-bot", .upToNextMajor(from: "2.0.1")))
-//    packageDependencies.append(.package(name: "SwiftTonTool", url: "https://github.com/oberton/swift-ton-tool", .upToNextMajor(from: "0.0.1")))
-#else
-    packageDependencies.append(.package(name: "TelegramVaporBot", path: "/Users/nerzh/mydata/swift_projects/TelegramVaporBot"))
-//    packageDependencies.append(.package(name: "SwiftTonTool", path: "/Users/nerzh/mydata/swift_projects/SwiftTonTool"))
-#endif
+//
+//#if os(Linux)
+//    packageDependencies.append(.package(url: "https://github.com/nerzh/telegram-vapor-bot", .upToNextMajor(from: "2.0.1")))
+//#else
+//    packageDependencies.append(.package(name: "telegram-vapor-bot", path: "/Users/nerzh/mydata/swift_projects/TelegramVaporBot"))
+//#endif
 
 let mainTarget: [Target.Dependency] = [
     .product(name: "Vapor", package: "vapor"),
     .product(name: "PostgresBridge", package: "PostgresBridge"),
     .product(name: "VaporBridges", package: "VaporBridges"),
     .product(name: "Bridges", package: "Bridges"),
-    .product(name: "TelegramVaporBot", package: "TelegramVaporBot"),
+    .product(name: "TelegramVaporBot", package: "telegram-vapor-bot"),
     .product(name: "SwiftRegularExpression", package: "swift-regular-expression"),
     .product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"),
 ]

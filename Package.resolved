@@ -217,6 +217,15 @@
       }
     },
     {
+      "identity" : "telegram-vapor-bot",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nerzh/telegram-vapor-bot.git",
+      "state" : {
+        "revision" : "fbcaae652aaa7ca0fe0b26d6251aa47f4f1fddbd",
+        "version" : "2.0.2"
+      }
+    },
+    {
       "identity" : "vapor",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/vapor.git",
