@@ -25,7 +25,6 @@ extension TelegramWebhookController {
     
     func telegramWebHook(_ req: Request) async throws -> Bool {
         let update: TGUpdate = try req.content.decode(TGUpdate.self)
-        try await TGBotConnection.dispatcher.process([update])
-        return true
+        return try await TGBOT.connection.dispatcher.process([update])
     }
 }

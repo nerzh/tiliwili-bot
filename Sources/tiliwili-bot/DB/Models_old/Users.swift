@@ -1,90 +1,90 @@
-////
-////  File.swift
-////  
-////
-////  Created by Oleh Hudeichuk on 06.06.2021.
-////
 //
-//import Foundation
-//import PostgresBridge
-//import Vapor
-//import telegram_vapor_bot
-//
-//final class Users: Table {
-//
-//    @Column("id")
-//    var id: Int64
-//
-//    @Column("chat_id")
-//    var chatId: Int64
-//
-//    @Column("locale_id")
-//    var localeId: Int64
-//
-//    @Column("user_name")
-//    var nick: String
-//
-//    @Column("first_name")
-//    var firstName: String
-//
-//    @Column("last_name")
-//    var lastName: String
-//
-//    @Column("language_code")
-//    var languageCode: String
-//
-//    @Column("is_bot")
-//    var isBot: Bool
-//
-//    @Column("wallet_id")
-//    var walletId: Int64?
-//
-//    @Column("created_at")
-//    public var createdAt: Date
-//
-//    @Column("updated_at")
-//    public var updatedAt: Date
-//
-//    /// See `Table`
-//    init() {}
-//
-//    init(
-//        chatId: Int64,
-//        localeId: Int64,
-//        nick: String,
-//        firstName: String,
-//        lastName: String,
-//        languageCode: String,
-//        isBot: Bool,
-//        updatedAt: Date
-//    ) {
-//        self.chatId = chatId
-//        self.localeId = localeId
-//        self.nick = nick
-//        self.firstName = firstName
-//        self.lastName = lastName
-//        self.languageCode = languageCode
-//        self.isBot = isBot
-//        self.updatedAt = updatedAt
-//    }
-//}
-//
-//// MARK: Query Models
-//extension Users {
-//
-//    final class Lang: Table {
-//        @Column("id")
-//        var id: Int
-//
-//        @Column("chat_id")
-//        var chatId: Int
-//
-//        @Column("locale_id")
-//        var localeId: Int
-//    }
-//}
+//  File.swift
 //
 //
+//  Created by Oleh Hudeichuk on 06.06.2021.
+//
+
+import Foundation
+import PostgresBridge
+import Vapor
+import TelegramVaporBot
+
+final class Users: Table {
+
+    @Column("id")
+    var id: Int64
+
+    @Column("chat_id")
+    var chatId: Int64
+
+    @Column("locale_id")
+    var localeId: Int64
+
+    @Column("user_name")
+    var nick: String
+
+    @Column("first_name")
+    var firstName: String
+
+    @Column("last_name")
+    var lastName: String
+
+    @Column("language_code")
+    var languageCode: String
+
+    @Column("is_bot")
+    var isBot: Bool
+
+    @Column("wallet_id")
+    var walletId: Int64?
+
+    @Column("created_at")
+    public var createdAt: Date
+
+    @Column("updated_at")
+    public var updatedAt: Date
+
+    /// See `Table`
+    init() {}
+
+    init(
+        chatId: Int64,
+        localeId: Int64,
+        nick: String,
+        firstName: String,
+        lastName: String,
+        languageCode: String,
+        isBot: Bool,
+        updatedAt: Date
+    ) {
+        self.chatId = chatId
+        self.localeId = localeId
+        self.nick = nick
+        self.firstName = firstName
+        self.lastName = lastName
+        self.languageCode = languageCode
+        self.isBot = isBot
+        self.updatedAt = updatedAt
+    }
+}
+
+// MARK: Query Models
+extension Users {
+
+    final class Lang: Table {
+        @Column("id")
+        var id: Int
+
+        @Column("chat_id")
+        var chatId: Int
+
+        @Column("locale_id")
+        var localeId: Int
+    }
+}
+
+
 //// MARK: Queries
 //extension Users {
 //
@@ -156,5 +156,5 @@
 //        return promise.futureResult
 //    }
 //}
-//
-//
+
+
