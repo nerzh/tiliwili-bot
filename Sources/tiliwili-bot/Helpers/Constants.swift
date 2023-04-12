@@ -8,7 +8,7 @@
 import Foundation
 import Vapor
 
-var Domain: String = "https://bytehub.io"
+var Domain: String = "https://tiliwili.bytehub.io"
 var VAPOR_PORT: Int!
 var VAPOR_IP: String!
 
