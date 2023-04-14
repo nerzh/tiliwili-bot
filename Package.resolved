@@ -19,15 +19,6 @@
       }
     },
     {
-      "identity" : "bridges",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nerzh/Bridges.git",
-      "state" : {
-        "branch" : "master",
-        "revision" : "c3ad356e4858401b0de0da6f4962ed83a31bab95"
-      }
-    },
-    {
       "identity" : "console-kit",
       "kind" : "remoteSourceControl",
       "location" : "https://github.com/vapor/console-kit.git",
@@ -70,15 +61,6 @@
       "state" : {
         "revision" : "611bc45c5dfb1f54b84d99b89d1f72191fb6b71b",
         "version" : "4.7.2"
-      }
-    },
-    {
-      "identity" : "swifql",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/SwifQL/SwifQL.git",
-      "state" : {
-        "revision" : "e398112f94e6d85a971fc5d6af3da3fc06bd047f",
-        "version" : "2.0.0-beta.3.20.1"
       }
     },
     {
@@ -214,15 +196,6 @@
       "state" : {
         "revision" : "19c3e569a8e81da6f7f4ee3b73028c25737d3706",
         "version" : "0.2.4"
-      }
-    },
-    {
-      "identity" : "telegram-vapor-bot",
-      "kind" : "remoteSourceControl",
-      "location" : "https://github.com/nerzh/telegram-vapor-bot.git",
-      "state" : {
-        "revision" : "fbcaae652aaa7ca0fe0b26d6251aa47f4f1fddbd",
-        "version" : "2.0.2"
       }
     },
     {

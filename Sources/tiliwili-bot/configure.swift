@@ -22,7 +22,7 @@ public func configure(_ app: Application) async throws {
     #if os(Linux)
     app.logger.logLevel = .warning
     #else
-    app.logger.logLevel = .notice
+    app.logger.logLevel = .debug
     #endif
     
     /// POSTGRES
@@ -33,16 +33,18 @@ public func configure(_ app: Application) async throws {
     TGBot.log.logLevel = app.logger.logLevel
     let bot: TGBot = .init(app: app, botId: TG_BOT_ID)
     if env.name == "production" {
-        await TGBOT.setConnection(TGWebHookConnection(bot: bot, webHookURL: "\(TG_WEBHOOK_DOMAIN!)/\(TGWebHookName)"))
+        await TGBOT.setConnection(try await TGWebHookConnection(bot: bot, webHookURL: "\(TG_WEBHOOK_DOMAIN!)/\(TGWebHookName)"))
     } else {
-        await TGBOT.setConnection(TGLongPollingConnection(bot: bot))
+        await TGBOT.setConnection(try await TGLongPollingConnection(bot: bot))
     }
     
-    await MainFlow.addHandlers(app: app, connection: TGBOT.connection)
+    try await MainFlow.addHandlers(app: app, connection: TGBOT.connection)
     try await TGBOT.connection.start()
     
+    /// WATCHERS
+    TelegramWatcher.start(checkEverySec: 5 * 60, timeoutSec: 2 * 86400)
     
-    // MARK: ROUTES
+    /// ROUTES
     try routes(app)
 }
 
