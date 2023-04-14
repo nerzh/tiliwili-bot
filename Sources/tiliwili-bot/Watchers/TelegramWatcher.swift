@@ -36,8 +36,8 @@ final class TelegramWatcher {
                                 else { throw makeError(AppError("User not found")) }
                                 guard let chat: Chats = try await Chats.get(\Chats.$id == object.chatsId)
                                 else { throw makeError(AppError("Chat not found")) }
+                                try? await JoinRequestDispatcher.updateDBIfDecline(userId: user.chatId, chatId: chat.chatId)
                                 try await bot.declineChatJoinRequest(params: .init(chatId: .chat(chat.chatId), userId: user.chatId))
-                                try await JoinRequestDispatcher.updateDBIfDecline(userId: user.chatId, chatId: chat.chatId)
                             }
                         }
                     }
