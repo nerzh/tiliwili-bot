@@ -71,7 +71,15 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
             let forSelect: [String] = ["banana", "candy", "apple", "lemon", "car", "key", "helicopter", "iPhone"]
             let element: String = forSelect.randomElement()!
             try await self.workWithDB(update: update, element: element)
-            let text: String = "Please click on the \(element)"
+            let text: String = """
+            Checking the entrance to the chat:
+            
+            id: \(tgChat.id)
+            title: \(tgChat.title ?? "")
+            username: \(tgChat.username ?? "")
+            
+            To enter, please click on the \(element)
+            """
             let keyboard: TGInlineKeyboardMarkup = .init(inlineKeyboard: buttons)
             let params: TGSendMessageParams = .init(chatId: .chat(userId),
                                                     text: text,
