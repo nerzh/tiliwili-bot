@@ -46,8 +46,8 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
                     try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(chatId), text: "Your response has been approved."))
                 }
             } else {
-                try await bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
                 try await Self.updateDBIfDecline(userId: userId, chatId: chatId)
+                try await bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
                 if let message = callbackQuery.message {
                     try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(chatId), messageId: message.messageId))
                     try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(chatId), text: "Your response has been rejected."))
