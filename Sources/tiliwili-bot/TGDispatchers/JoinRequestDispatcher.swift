@@ -42,15 +42,17 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
                 try await bot.approveChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
                 try await updateDBIfApprove(userId: userId, chatId: chatId)
                 if let message = callbackQuery.message {
-                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(chatId), messageId: message.messageId))
-                    try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(chatId), text: "Your response has been approved."))
+                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
+                    /// bot can't initiate conversation with a user
+                    /// try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(message.chat.id), text: "Your response has been approved."))
                 }
             } else {
                 try await Self.updateDBIfDecline(userId: userId, chatId: chatId)
                 try await bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
                 if let message = callbackQuery.message {
-                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(chatId), messageId: message.messageId))
-                    try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(chatId), text: "Your response has been rejected."))
+                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
+                    /// bot can't initiate conversation with a user
+                    /// try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(message.chat.id), text: "Your response has been rejected."))
                 }
             }
         })
@@ -80,13 +82,14 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
             let element: String = forSelect.randomElement()!
             try await self.workWithDB(update: update, element: element)
             let text: String = """
+            \(element)
+            
             Checking the entrance to the chat:
             
-            id: \(tgChat.id)
-            title: \(tgChat.title ?? "")
-            username: \(tgChat.username ?? "")
+            title: \(tgChat.title ?? "no title")
+            username: \(tgChat.username ?? "no username")
             
-            To enter, please click on the \(element)
+            To enter, please click on the: \(element)
             """
             let keyboard: TGInlineKeyboardMarkup = .init(inlineKeyboard: buttons)
             let params: TGSendMessageParams = .init(chatId: .chat(userId),
