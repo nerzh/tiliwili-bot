@@ -19,7 +19,7 @@ var PG_PORT: Int = 0
 var PG_USER: String = ""
 var PG_PSWD: String = ""
 var PG_DB_NAME: String = ""
-var PG_DB_CONNECTIONS: Int = Int(Double(80) / Double(System.coreCount))
+var PG_DB_CONNECTIONS: Int = 5
 
 
 var TG_BOT_ID: String!
