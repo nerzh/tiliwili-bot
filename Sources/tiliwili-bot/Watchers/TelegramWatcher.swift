@@ -15,7 +15,7 @@ final class TelegramWatcher {
     class func start(checkEverySec: UInt32, timeoutSec: Int64) {
         Thread {
             while true {
-                Task {
+                Task.detached {
                     try await app.postgres.transaction(to: .default) { conn in
                         let objects: [JoinRequests] = try await SwifQL.select(
                              \JoinRequests.$id,

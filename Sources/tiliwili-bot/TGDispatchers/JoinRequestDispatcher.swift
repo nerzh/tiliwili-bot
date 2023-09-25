@@ -13,12 +13,8 @@ import PostgresBridge
 import SwiftExtensionsPack
 
 final class JoinRequestDispatcher: TGDefaultDispatcher {
-    required init(bot: TGBot) async throws {
-        try await super.init(bot: bot)
-        try await handler()
-    }
     
-    private func handler() async throws {
+    override func handle() async throws {
         try await addWhenJoinUser()
         try await addWhenClickButton()
     }

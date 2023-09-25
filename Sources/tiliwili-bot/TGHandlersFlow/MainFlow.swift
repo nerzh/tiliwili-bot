@@ -18,6 +18,7 @@ final class MainFlow {
         await connection.dispatcher.add(TGBaseHandler({ update, bot in
             Task.detached {
                 try await JoinRequestDispatcher(bot: bot).process([update])
+                try await TestDispatcher(bot: bot).process([update])
             }
         }))
     }

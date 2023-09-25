@@ -83,8 +83,7 @@ extension Users {
                  \Users.$updatedAt,
                  \Users.$createdAt
             ).from(Users.table)
-                .where(\Users.$chatId == chatId
-                )
+                .where(\Users.$chatId == chatId)
                 .execute(on: conn)
                 .first(decoding: Users.self)
 

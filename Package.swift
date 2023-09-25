@@ -33,10 +33,10 @@ mainTarget.append(.product(name: "SwifQL", package: "SwifQL"))
 packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/TelegramVaporBot"))
 mainTarget.append(.product(name: "TelegramVaporBot", package: "TelegramVaporBot"))
 
-packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/Bridges"))
+packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/test/Bridges"))
 mainTarget.append(.product(name: "Bridges", package: "Bridges"))
 
-packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/SwifQL"))
+packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/test/SwifQL"))
 mainTarget.append(.product(name: "SwifQL", package: "SwifQL"))
 #endif
 
