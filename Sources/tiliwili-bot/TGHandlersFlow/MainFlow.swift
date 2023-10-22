@@ -19,6 +19,7 @@ final class MainFlow {
             Task.detached {
                 try await JoinRequestDispatcher(bot: bot).process([update])
                 try await TestDispatcher(bot: bot).process([update])
+                try await DeleteKoreanMessageDispatcher(bot: bot).process([update])
             }
         }))
     }
