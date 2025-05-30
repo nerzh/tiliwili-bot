@@ -27,7 +27,8 @@ app.logger.debug("Running with \(executorTakeoverSuccess ? "SwiftNIO" : "standar
 do {
     try await configure(app, env)
 } catch {
-    app.logger.critical("\(String(describing: error))\n\(error.localizedDescription)")
+    app.logger.critical("1 - error: \(String(describing: error))\n\(error.localizedDescription)")
+    app.logger.critical("2 - error: \(String(reflecting: error))")
     try? await app.asyncShutdown()
 }
 app.logger.info("begin app app.execute()...")
