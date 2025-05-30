@@ -11,10 +11,10 @@ var targetPlugins: [PackageDescription.Target.PluginUsage] = []
 packageDependencies.append(.package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")))
 targetDependencies.append(.product(name: "Vapor", package: "vapor"))
 
-packageDependencies.append(.package(url: "https://github.com/vapor/fluent", from: "4.0.0"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent", .upToNextMajor(from: "4.12.0")))
 targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 
-packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.9.2")))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.10.0")))
 targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
@@ -29,10 +29,10 @@ targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swi
 packageDependencies.append(.package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")))
 targetDependencies.append(.product(name: "Vapor", package: "vapor"))
 
-packageDependencies.append(.package(url: "https://github.com/vapor/fluent", exact: "4.11.0"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent", .upToNextMajor(from: "4.12.0")))
 targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 
-packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", exact: "2.9.2"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.10.0")))
 targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
