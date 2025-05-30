@@ -6,29 +6,30 @@
 //
 
 import Foundation
-import Bridges
+import Fluent
+import FluentPostgresDriver
 
-struct Сreate_Users_1: TableMigration {
-    typealias Table = Users
-
-    static func prepare(on conn: BridgeConnection) async throws {
-        let builder: CreateTableBuilder<Table> = createBuilder
-        _ = builder.column("id", .bigserial, .primaryKey, .notNull)
-        _ = builder.column("chat_id", .bigint, .notNull)
-        _ = builder.column("username", .text)
-        _ = builder.column("first_name", .text, .default(""), .notNull)
-        _ = builder.column("last_name", .text)
-        _ = builder.column("language_code", .text)
-        _ = builder.column("is_bot", .bool, .default(false), .notNull)
-        
-        _ = builder.column("created_at", .timestamptz, .default(Fn.now()), .notNull)
-        _ = builder.column("updated_at", .timestamptz, .default(Fn.now()), .notNull)
-
-        try await builder.execute(on: conn)
+struct Сreate_Users_1: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(Users.schema)
+                .field(.id, .int64, .identifier(auto: true))
+                .field(.string("chat_id"), .int64, .required)
+                .field(.string("username"), .string)
+                .field(.string("first_name"), .string, .sql(.default("")))
+                .field(.string("last_name"), .string)
+                .field(.string("language_code"), .string)
+                .field(.string("is_bot"), .bool, .sql(.default(false)))
+                
+                .field(.string("updated_at"), .datetime)
+                .field(.string("created_at"), .datetime)
+                .create()
+        }
     }
-
-    static func revert(on conn: BridgeConnection) async throws {
-        let builder: DropTableBuilder<Table> = dropBuilder
-        try await builder.execute(on: conn)
+    
+    func revert(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(Users.schema).delete()
+        }
     }
 }

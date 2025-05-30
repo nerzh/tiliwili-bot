@@ -6,40 +6,40 @@
 //
 
 import Foundation
-import PostgresBridge
-import Vapor
-import TelegramVaporBot
+import Fluent
+import FluentPostgresDriver
 
-final class Users: Table {
-
-    @Column("id")
-    var id: Int64
-    @Column("created_at")
-    public var createdAt: Date
-    @Column("updated_at")
-    public var updatedAt: Date
-
-    @Column("chat_id")
+final class Users: Model, @unchecked Sendable {
+    
+    static var schema: String { "Users".lowercased() }
+    
+    @ID(custom: "id", generatedBy: .database)
+    var id: Int64?
+    @Timestamp(key: "created_at", on: .create)
+    public var createdAt: Date?
+    @Timestamp(key: "updated_at", on: .update)
+    public var updatedAt: Date?
+    
+    @Field(key: "chat_id")
     var chatId: Int64
-
-    @Column("username")
+    
+    @Field(key: "username")
     var username: String?
-
-    @Column("first_name")
+    
+    @Field(key: "first_name")
     var firstName: String
-
-    @Column("last_name")
+    
+    @Field(key: "last_name")
     var lastName: String?
-
-    @Column("language_code")
+    
+    @Field(key: "language_code")
     var languageCode: String?
-
-    @Column("is_bot")
+    
+    @Field(key: "is_bot")
     var isBot: Bool
-
-    /// See `Table`
+    
     init() {}
-
+    
     init(
         chatId: Int64,
         username: String?,
@@ -61,65 +61,67 @@ final class Users: Table {
 
 ////// MARK: Queries
 extension Users {
-
-    @discardableResult
-    static func updateOrCreate(chatId: Int64,
-                               username: String?,
-                               firstName: String,
-                               lastName: String?,
-                               languageCode: String?,
-                               isBot: Bool
+    
+    static func create(
+        chatId: Int64,
+        username: String?,
+        firstName: String,
+        lastName: String?,
+        languageCode: String?,
+        isBot: Bool,
+        db: any Database
+    ) async throws {
+        let object: Users = .init(
+            chatId: chatId,
+            username: username,
+            firstName: firstName,
+            lastName: lastName,
+            languageCode: languageCode,
+            isBot: isBot
+        )
+        try await object.create(on: db)
+    }
+    
+    static func updateOrCreate(
+        chatId: Int64,
+        username: String?,
+        firstName: String,
+        lastName: String?,
+        languageCode: String?,
+        isBot: Bool,
+        db: any Database
     ) async throws -> Users {
-        return try await app.postgres.transaction(to: .default) { conn in
-            var object: Users!
-            object = try await SwifQL.select(
-                 \Users.$id,
-                 \Users.$chatId,
-                 \Users.$username,
-                 \Users.$firstName,
-                 \Users.$lastName,
-                 \Users.$languageCode,
-                 \Users.$isBot,
-                 \Users.$updatedAt,
-                 \Users.$createdAt
-            ).from(Users.table)
-                .where(\Users.$chatId == chatId)
-                .execute(on: conn)
-                .first(decoding: Users.self)
-
-            if object == nil {
-                object = .init(chatId: chatId, username: username, firstName: firstName, lastName: lastName, languageCode: languageCode, isBot: isBot)
-                return try await object.insert(on: conn)
+        try await db.transaction { db in
+            let object = try await db.query(Users.self)
+                .filter(\.$chatId == chatId)
+                .all().first
+            if object != nil {
+                object!.username = username
+                object!.firstName = firstName
+                object!.lastName = lastName
+                object!.languageCode = languageCode
+                object!.isBot = isBot
+                try await object!.save(on: db)
             } else {
-                object.username = username
-                object.firstName = firstName
-                object.lastName = lastName
-                object.languageCode = languageCode
-                object.isBot = isBot
-                return try await object.upsert(conflictColumn: \Users.$id, on: conn)
+                try await create(
+                    chatId: chatId,
+                    username: username,
+                    firstName: firstName,
+                    lastName: lastName,
+                    languageCode: languageCode,
+                    isBot: isBot,
+                    db: db
+                )
             }
+            return try await get(\.$chatId == chatId, db: db)!
         }
     }
     
-    static func get(_ predicates: SwifQLable) async throws -> Users? {
-        return try await app.postgres.transaction(to: .default) { conn in
-            var object: Users?
-            object = try await SwifQL.select(
-                 \Users.$id,
-                 \Users.$chatId,
-                 \Users.$username,
-                 \Users.$firstName,
-                 \Users.$lastName,
-                 \Users.$languageCode,
-                 \Users.$isBot,
-                 \Users.$updatedAt,
-                 \Users.$createdAt
-            ).from(Users.table)
-                .where(predicates)
-                .execute(on: conn)
-                .first(decoding: Users.self)
-            
-            return object
+    static func get(_ predicates: ModelValueFilter<Users>..., db: any Database) async throws -> Users? {
+        var builder: QueryBuilder<Users> = db.query(Users.self)
+        for predicate in predicates {
+            builder = builder.filter(predicate)
         }
+        return try await builder.first()
     }
 }

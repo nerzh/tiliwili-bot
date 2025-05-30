@@ -1,52 +1,57 @@
-// swift-tools-version:5.8
+// swift-tools-version:6.0
 
 import PackageDescription
 
-let name: String = "tiliwili-bot"
+var packageDependencies: [Package.Dependency] = []
+var targetDependencies: [PackageDescription.Target.Dependency] = []
+var targetPlugins: [PackageDescription.Target.PluginUsage] = []
 
-var packageDependencies: [Package.Dependency] = [
-    .package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")),
-    .package(url: "https://github.com/nerzh/VaporBridges.git", branch: "master"),
-    .package(url: "https://github.com/nerzh/PostgresBridge.git", branch: "master"),
-    .package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")),
-    .package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "1.2.0")),
-]
-
-var mainTarget: [Target.Dependency] = [
-    .product(name: "Vapor", package: "vapor"),
-    .product(name: "PostgresBridge", package: "PostgresBridge"),
-    .product(name: "VaporBridges", package: "VaporBridges"),
-    .product(name: "SwiftRegularExpression", package: "swift-regular-expression"),
-    .product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"),
-]
 
 #if os(Linux)
-packageDependencies.append(.package(url: "https://github.com/nerzh/telegram-vapor-bot.git", .upToNextMajor(from: "2.0.1")))
-mainTarget.append(.product(name: "TelegramVaporBot", package: "telegram-vapor-bot"))
+packageDependencies.append(.package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")))
+targetDependencies.append(.product(name: "Vapor", package: "vapor"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/Bridges.git", branch: "master"))
-mainTarget.append(.product(name: "Bridges", package: "Bridges"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent", from: "4.0.0"))
+targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/SwifQL.git", branch: "master"))
-mainTarget.append(.product(name: "SwifQL", package: "SwifQL"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.9.2")))
+targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
+targetDependencies.append(.product(name: "SwiftTelegramSdk", package: "swift-telegram-sdk"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.0.3")))
+targetDependencies.append(.product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")))
+targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swift-regular-expression"))
 #else
-packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/TelegramVaporBot"))
-mainTarget.append(.product(name: "TelegramVaporBot", package: "TelegramVaporBot"))
+packageDependencies.append(.package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")))
+targetDependencies.append(.product(name: "Vapor", package: "vapor"))
 
-packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/test/Bridges"))
-mainTarget.append(.product(name: "Bridges", package: "Bridges"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent", exact: "4.11.0"))
+targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 
-packageDependencies.append(.package(path: "/Users/nerzh/mydata/swift_projects/test/SwifQL"))
-mainTarget.append(.product(name: "SwifQL", package: "SwifQL"))
+packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", exact: "2.9.2"))
+targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
+targetDependencies.append(.product(name: "SwiftTelegramSdk", package: "swift-telegram-sdk"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.0.3")))
+targetDependencies.append(.product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"))
+
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")))
+targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swift-regular-expression"))
 #endif
 
 
 
-
+let name: String = "tiliwili-bot"
 let package = Package(
     name: name,
     platforms: [
-       .macOS(.v12)
+       .macOS(.v13)
     ],
     products: [
         .executable(name: name, targets: [name])
@@ -55,10 +60,9 @@ let package = Package(
     targets: [
         .executableTarget(
             name: name,
-            dependencies: mainTarget,
-            swiftSettings: [
-                .unsafeFlags(["-cross-module-optimization"], .when(configuration: .release))
-            ]
+            dependencies: targetDependencies,
+            path: "Sources/\(name)",
+            plugins: targetPlugins
         )
     ]
 )

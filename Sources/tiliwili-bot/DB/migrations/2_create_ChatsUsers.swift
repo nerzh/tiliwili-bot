@@ -6,28 +6,28 @@
 //
 
 import Foundation
-import Bridges
+import Fluent
+import FluentPostgresDriver
 
-struct Сreate_ChatsUsers_2: TableMigration {
-    typealias Table = ChatsUsers
-
-    static func prepare(on conn: BridgeConnection) async throws {
-        let builder: CreateTableBuilder<Table> = createBuilder
-        _ = builder.column("id", .bigserial, .primaryKey, .notNull)
-        _ = builder.column("users_id", .bigint, .notNull)
-        _ = builder.column("chats_id", .bigint, .notNull)
-        _ = builder.column("approved", .bool, .default(false), .notNull)
-        _ = builder.column("banned", .bool, .default(false), .notNull)
-        
-        _ = builder.column("created_at", .timestamptz, .default(Fn.now()), .notNull)
-        _ = builder.column("updated_at", .timestamptz, .default(Fn.now()), .notNull)
-
-        try await builder.execute(on: conn)
+struct Сreate_ChatsUsers_2: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(ChatsUsers.schema)
+                .field(.id, .int64, .identifier(auto: true))
+                .field(.string("users_id"), .int64, .required)
+                .field(.string("chats_id"), .int64, .required)
+                .field(.string("approved"), .bool, .sql(.default(false)))
+                .field(.string("banned"), .bool, .sql(.default(false)))
+                
+                .field(.string("updated_at"), .datetime)
+                .field(.string("created_at"), .datetime)
+                .create()
+        }
     }
-
-    static func revert(on conn: BridgeConnection) async throws {
-        let builder: DropTableBuilder<Table> = dropBuilder
-        try await builder.execute(on: conn)
+    
+    func revert(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(ChatsUsers.schema).delete()
+        }
     }
 }
-

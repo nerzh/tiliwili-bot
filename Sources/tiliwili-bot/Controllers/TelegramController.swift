@@ -7,17 +7,17 @@
 
 import Foundation
 import Vapor
-import TelegramVaporBot
+@preconcurrency import SwiftTelegramSdk
 
-final class TelegramWebhookController: RouteCollection {
-    
+
+final class TelegramController: RouteCollection, Sendable {
     func boot(routes: Vapor.RoutesBuilder) throws {
         routes.get("/", use: test)
         routes.post("\(TGWebHookName)", use: telegramWebHook)
     }
 }
 
-extension TelegramWebhookController {
+extension TelegramController {
     
     func test(_ req: Request) async throws -> String {
         "Swift works..."
@@ -25,6 +25,7 @@ extension TelegramWebhookController {
     
     func telegramWebHook(_ req: Request) async throws -> Bool {
         let update: TGUpdate = try req.content.decode(TGUpdate.self)
-        return try await TGBOT.connection.dispatcher.process([update])
+        Task { await app.botActor.bot.dispatcher.process([update]) }
+        return true
     }
 }

@@ -6,21 +6,19 @@
 //
 
 import Vapor
-import TelegramVaporBot
+@preconcurrency import SwiftTelegramSdk
 
 final class MainFlow {
 
-    static func addHandlers(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
-        try await router(app: app, connection: connection)
+    static func addHandlers(app: Vapor.Application) async throws {
+        try await router(app: app)
     }
 
-    private class func router(app: Vapor.Application, connection: TGConnectionPrtcl) async throws {
-        await connection.dispatcher.add(TGBaseHandler({ update, bot in
-            Task.detached {
-                try await JoinRequestDispatcher(bot: bot).process([update])
-                try await TestDispatcher(bot: bot).process([update])
-                try await DeleteKoreanMessageDispatcher(bot: bot).process([update])
-            }
+    private class func router(app: Vapor.Application) async throws {
+        await app.botActor.bot.dispatcher.add(TGBaseHandler({ update in
+            Task.detached { try await JoinRequestDispatcher(log: app.logger).process([update]) }
+            Task.detached {try await TestDispatcher(log: app.logger).process([update]) }
+            Task.detached {try await DeleteKoreanMessageDispatcher(log: app.logger).process([update]) }
         }))
     }
 }

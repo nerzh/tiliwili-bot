@@ -7,11 +7,10 @@
 
 import Foundation
 import Vapor
-import VaporBridges
-import PostgresBridge
-import TelegramVaporBot
+@preconcurrency import SwiftTelegramSdk
+import SwiftExtensionsPack
 
-public func configure(_ app: Application) async throws {
+public func configure(_ app: Application, _ env: Environment) async throws {
     let env = try Environment.detect()
     
     /// GET ENV
@@ -29,17 +28,46 @@ public func configure(_ app: Application) async throws {
     try await configureDataBase(app)
     
     /// BOT
-    /// set level of debug if you needed
-    TGBot.log.logLevel = app.logger.logLevel
-    let bot: TGBot = .init(app: app, botId: TG_BOT_ID)
-    if env.name == "production" {
-        await TGBOT.setConnection(try await TGWebHookConnection(bot: bot, webHookURL: "\(TG_WEBHOOK_DOMAIN!)/\(TGWebHookName)"))
+    let connectionType: TGConnectionType =
+    if app.environment == .production {
+        .webhook(
+            webHookURL: URL.init(
+                string: "\(TG_WEBHOOK_DOMAIN)/\(TGWebHookName)"
+            )!
+        )
     } else {
-        await TGBOT.setConnection(try await TGLongPollingConnection(bot: bot))
+        .longpolling(
+            limit: nil,
+            timeout: nil,
+            allowedUpdates: nil
+        )
     }
     
-    try await MainFlow.addHandlers(app: app, connection: TGBOT.connection)
-    try await TGBOT.connection.start()
+    let bot: TGBot = try await .init(
+        connectionType: connectionType,
+        dispatcher: nil,
+        tgClient: VaporTGClient(client: app.client),
+        tgURI: TGBot.standardTGURL,
+        botId: TG_BOT_ID,
+        log: app.logger
+    )
+    
+    app.botActor = .init()
+    await app.botActor.setBot(bot)
+    try await MainFlow.addHandlers(app: app)
+    try await app.botActor.bot.start()
+    
+    /// set level of debug if you needed
+//    TGBot.log.logLevel = app.logger.logLevel
+//    let bot: TGBot = .init(app: app, botId: TG_BOT_ID)
+//    if env.name == "production" {
+//        await TGBOT.setConnection(try await TGWebHookConnection(bot: bot, webHookURL: "\(TG_WEBHOOK_DOMAIN!)/\(TGWebHookName)"))
+//    } else {
+//        await TGBOT.setConnection(try await TGLongPollingConnection(bot: bot))
+//    }
+//    
+//    try await MainFlow.addHandlers(app: app, connection: TGBOT.connection)
+//    try await TGBOT.connection.start()
     
     /// WATCHERS
     TelegramWatcher.start(checkEverySec: 5 * 60, timeoutSec: 2 * 86400)

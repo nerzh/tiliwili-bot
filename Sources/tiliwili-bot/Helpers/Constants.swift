@@ -8,22 +8,22 @@
 import Foundation
 import Vapor
 
-var Domain: String = "https://tiliwili.bytehub.io"
-var VAPOR_PORT: Int!
-var VAPOR_IP: String!
+nonisolated(unsafe) var Domain: String = "https://tiliwili.bytehub.io"
+nonisolated(unsafe) var VAPOR_PORT: Int!
+nonisolated(unsafe) var VAPOR_IP: String!
 
 let TGWebHookName: String = "telegramWebHook"
 
-var PG_HOST: String = ""
-var PG_PORT: Int = 0
-var PG_USER: String = ""
-var PG_PSWD: String = ""
-var PG_DB_NAME: String = ""
-var PG_DB_CONNECTIONS: Int = 5
+nonisolated(unsafe) var PG_HOST: String = ""
+nonisolated(unsafe) var PG_PORT: Int = 0
+nonisolated(unsafe) var PG_USER: String = ""
+nonisolated(unsafe) var PG_PSWD: String = ""
+nonisolated(unsafe) var PG_DB_NAME: String = ""
+nonisolated(unsafe) var PG_DB_CONNECTIONS: Int = 5
 
 
-var TG_BOT_ID: String!
-var TG_WEBHOOK_DOMAIN: String!
+nonisolated(unsafe) var TG_BOT_ID: String!
+nonisolated(unsafe) var TG_WEBHOOK_DOMAIN: String!
 
 func getAllEnvConstants() throws {
     let env = try Environment.detect()

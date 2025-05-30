@@ -6,11 +6,12 @@
 //
 
 import Foundation
-import TelegramVaporBot
+@preconcurrency import SwiftTelegramSdk
 import Vapor
 import SwiftRegularExpression
-import PostgresBridge
 import SwiftExtensionsPack
+import Fluent
+import FluentPostgresDriver
 
 final class JoinRequestDispatcher: TGDefaultDispatcher {
     
@@ -20,8 +21,7 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
     }
     
     private func addWhenClickButton() async throws {
-        await add(TGCallbackQueryHandler(pattern: "JoinRequestButton:") { [weak self] update, bot in
-            guard let self = self else { return }
+        await add(TGCallbackQueryHandler(pattern: "JoinRequestButton:") { update in
             guard let callbackQuery = update.callbackQuery else { return }
             guard let data = callbackQuery.data else { throw AppError("callbackQuery data not found") }
             let matches: [Int: String] = data.regexp(#"JoinRequestButton: (.+) (.+)"#)
@@ -33,20 +33,20 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
                 throw AppError("callbackQuery chatId not found")
             }
             let userId: Int64 = callbackQuery.from.id
-            let approve: Bool = try await checkResponse(userId: userId, chatId: chatId, element: element)
+            let approve: Bool = try await Self.checkResponse(userId: userId, chatId: chatId, element: element)
             if approve {
-                try await bot.approveChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
-                try await updateDBIfApprove(userId: userId, chatId: chatId)
+                try await app.botActor.bot.approveChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
+                try await Self.updateDBIfApprove(userId: userId, chatId: chatId)
                 if let message = callbackQuery.message {
-                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
+                    try await app.botActor.bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
                     /// bot can't initiate conversation with a user
                     /// try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(message.chat.id), text: "Your response has been approved."))
                 }
             } else {
                 try await Self.updateDBIfDecline(userId: userId, chatId: chatId)
-                try await bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
+                try await app.botActor.bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
                 if let message = callbackQuery.message {
-                    try await bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
+                    try await app.botActor.bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
                     /// bot can't initiate conversation with a user
                     /// try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(message.chat.id), text: "Your response has been rejected."))
                 }
@@ -55,8 +55,7 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
     }
     
     private func addWhenJoinUser() async throws {
-        await add(TGBaseHandler() { [weak self] update, bot in
-            guard let self = self else { return }
+        await add(TGBaseHandler() { update in
             guard let chatJoinRequest = update.chatJoinRequest else { return }
             let userId: Int64 = chatJoinRequest.from.id
             let tgChat: TGChat = update.chatJoinRequest!.chat
@@ -76,7 +75,7 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
             ]
             let forSelect: [String] = ["banana", "candy", "apple", "lemon", "car", "key", "helicopter", "iPhone"]
             let element: String = forSelect.randomElement()!
-            try await self.workWithDB(update: update, element: element)
+            try await Self.workWithDB(update: update, element: element)
             let text: String = """
             \(element)
             
@@ -91,61 +90,72 @@ final class JoinRequestDispatcher: TGDefaultDispatcher {
             let params: TGSendMessageParams = .init(chatId: .chat(userId),
                                                     text: text,
                                                     replyMarkup: .inlineKeyboardMarkup(keyboard))
-            try await bot.sendMessage(params: params)
+            try await app.botActor.bot.sendMessage(params: params)
         })
     }
     
-    private func workWithDB(update: TGUpdate, element: String) async throws {
-        let tgUser: TGUser = update.chatJoinRequest!.from
-        let tgChat: TGChat = update.chatJoinRequest!.chat
-        let user: Users = try await Users.updateOrCreate(chatId: tgUser.id,
-                                                         username: tgUser.username,
-                                                         firstName: tgUser.firstName,
-                                                         lastName: tgUser.lastName,
-                                                         languageCode: tgUser.languageCode,
-                                                         isBot: tgUser.isBot)
-        
-        let chat: Chats = try await Chats.updateOrCreate(chatId: tgChat.id,
-                                                         chatType: tgChat.type,
-                                                         title: tgChat.title,
-                                                         username: tgChat.username)
-        
-        try await ChatsUsers.updateOrCreate(usersId: user.id,
-                                            chatsId: chat.id,
-                                            approved: false,
-                                            banned: false)
-        
-        try await JoinRequests.updateOrCreate(usersId: user.id, chatsId: chat.id, element: element)
+    private static func workWithDB(update: TGUpdate, element: String) async throws {
+        do {
+            let tgUser: TGUser = update.chatJoinRequest!.from
+            let tgChat: TGChat = update.chatJoinRequest!.chat
+            let user: Users = try await Users.updateOrCreate(chatId: tgUser.id,
+                                                             username: tgUser.username,
+                                                             firstName: tgUser.firstName,
+                                                             lastName: tgUser.lastName,
+                                                             languageCode: tgUser.languageCode,
+                                                             isBot: tgUser.isBot,
+                                                             db: app.db)
+            
+            let chat: Chats = try await Chats.updateOrCreate(chatId: tgChat.id,
+                                                             chatType: tgChat.type,
+                                                             title: tgChat.title,
+                                                             username: tgChat.username,
+                                                             db: app.db)
+            
+            try await ChatsUsers.updateOrCreate(usersId: user.id!,
+                                                chatsId: chat.id!,
+                                                approved: false,
+                                                banned: false,
+                                                db: app.db)
+            
+            try await JoinRequests.updateOrCreate(usersId: user.id!, chatsId: chat.id!, element: element, db: app.db)
+        } catch {
+            print(String(reflecting: error))
+            throw AppError(error, logLevel: .debug)
+        }
     }
     
-    private func checkResponse(userId: Int64, chatId: Int64, element: String) async throws -> Bool {
-        guard let user: Users = try await Users.get(\Users.$chatId == userId) else { throw makeError(AppError("User not found")) }
-        guard let chat: Chats = try await Chats.get(\Chats.$chatId == chatId) else { throw makeError(AppError("Chat not found")) }
-        let approve: Bool = try await JoinRequests.checkElement(usersId: user.id, chatsId: chat.id, element: element)
+    private static func checkResponse(userId: Int64, chatId: Int64, element: String) async throws -> Bool {
+        guard let user: Users = try await Users.get(\Users.$chatId == userId, db: app.db) else { throw makeError(AppError("User not found")) }
+        guard let chat: Chats = try await Chats.get(\Chats.$chatId == chatId, db: app.db) else { throw makeError(AppError("Chat not found")) }
+        let approve: Bool = try await JoinRequests.checkElement(usersId: user.id!, chatsId: chat.id!, element: element, db: app.db)
         return approve
     }
     
-    private func updateDBIfApprove(userId: Int64, chatId: Int64) async throws {
-        guard let user: Users = try await Users.get(\Users.$chatId == userId) else { throw makeError(AppError("User not found")) }
-        guard let chat: Chats = try await Chats.get(\Chats.$chatId == chatId) else { throw makeError(AppError("Chat not found")) }
-        guard let request: JoinRequests = try await JoinRequests.get(\JoinRequests.$usersId == user.id && \JoinRequests.$chatsId == chat.id) else {
+    private static func updateDBIfApprove(userId: Int64, chatId: Int64) async throws {
+        guard let user: Users = try await Users.get(\Users.$chatId == userId, db: app.db) else { throw makeError(AppError("User not found")) }
+        guard let chat: Chats = try await Chats.get(\Chats.$chatId == chatId, db: app.db) else { throw makeError(AppError("Chat not found")) }
+        guard
+            let request: JoinRequests = try await JoinRequests.get(
+                \.$usersId == user.id!,
+                 \.$chatsId == chat.id!,
+                 db: app.db
+        ) else {
             throw makeError(AppError("JoinRequests not found"))
         }
-        try await app.postgres.transaction(to: .default) { conn in
-            try await request.delete(on: \JoinRequests.$id, on: conn)
-        }
-        try await ChatsUsers.updateOrCreate(usersId: user.id, chatsId: chat.id, approved: true, banned: false)
+        try await request.delete(on: app.db)
+        try await ChatsUsers.updateOrCreate(usersId: user.id!, chatsId: chat.id!, approved: true, banned: false, db: app.db)
     }
     
     class func updateDBIfDecline(userId: Int64, chatId: Int64) async throws {
-        guard let user: Users = try await Users.get(\Users.$chatId == userId) else { throw makeError(AppError("User not found")) }
-        guard let chat: Chats = try await Chats.get(\Chats.$chatId == chatId) else { throw makeError(AppError("Chat not found")) }
-        guard let request: JoinRequests = try await JoinRequests.get(\JoinRequests.$usersId == user.id && \JoinRequests.$chatsId == chat.id) else {
+        guard let user: Users = try await Users.get(\.$chatId == userId, db: app.db) else { throw makeError(AppError("User not found")) }
+        guard let chat: Chats = try await Chats.get(\.$chatId == chatId, db: app.db) else { throw makeError(AppError("Chat not found")) }
+        guard
+            let request: JoinRequests = try await JoinRequests.get(\JoinRequests.$usersId == user.id!, \JoinRequests.$chatsId == chat.id!, db: app.db
+        ) else {
             throw makeError(AppError("JoinRequests not found"))
         }
-        try await app.postgres.transaction(to: .default) { conn in
-            try await request.delete(on: \JoinRequests.$id, on: conn)
-        }
-        try await ChatsUsers.updateOrCreate(usersId: chat.id, chatsId: user.id, approved: false, banned: false)
+        try await request.delete(on: app.db)
+        try await ChatsUsers.updateOrCreate(usersId: chat.id!, chatsId: user.id!, approved: false, banned: false, db: app.db)
     }
 }

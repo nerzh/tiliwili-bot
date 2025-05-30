@@ -6,28 +6,28 @@
 //
 
 import Foundation
-import Bridges
+import Fluent
+import FluentPostgresDriver
 
-struct Сreate_Chats_4: TableMigration {
-    typealias Table = Chats
-
-    static func prepare(on conn: BridgeConnection) async throws {
-        let builder: CreateTableBuilder<Table> = createBuilder
-        _ = builder.column("id", .bigserial, .primaryKey, .notNull)
-        _ = builder.column("chat_id", .bigint, .notNull)
-        _ = builder.column("chat_type", .text, .notNull)
-        _ = builder.column("title", .text)
-        _ = builder.column("username", .text)
-        
-        _ = builder.column("created_at", .timestamptz, .default(Fn.now()), .notNull)
-        _ = builder.column("updated_at", .timestamptz, .default(Fn.now()), .notNull)
-
-        try await builder.execute(on: conn)
+struct Сreate_Chats_4: AsyncMigration {
+    func prepare(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(Chats.schema)
+                .field(.id, .int64, .identifier(auto: true))
+                .field(.string("chat_id"), .int64, .required)
+                .field(.string("chat_type"), .string, .required)
+                .field(.string("title"), .string)
+                .field(.string("username"), .string)
+                
+                .field(.string("updated_at"), .datetime)
+                .field(.string("created_at"), .datetime)
+                .create()
+        }
     }
-
-    static func revert(on conn: BridgeConnection) async throws {
-        let builder: DropTableBuilder<Table> = dropBuilder
-        try await builder.execute(on: conn)
+    
+    func revert(on database: Database) async throws {
+        try await database.transaction { database in
+            try await database.schema(Chats.schema).delete()
+        }
     }
 }
-

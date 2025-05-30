@@ -6,9 +6,9 @@
 ////
 //
 import Vapor
-import TelegramVaporBot
+import SwiftTelegramSdk
 
 func routes(_ app: Application) throws {
-    try app.register(collection: TelegramWebhookController())
+    try app.register(collection: TelegramController())
 }
 

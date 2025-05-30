@@ -1,33 +1,35 @@
 //
 //  File.swift
-//  
+//
 //
 //  Created by Oleh Hudeichuk on 14.04.2023.
 //
 
 import Foundation
-import PostgresBridge
-import Vapor
+import Fluent
+import FluentPostgresDriver
 
-final class JoinRequests: Table {
+final class JoinRequests: Model, @unchecked Sendable {
     
-    @Column("id")
-    var id: Int64
-    @Column("created_at")
-    public var createdAt: Date
-    @Column("updated_at")
-    public var updatedAt: Date
+    static var schema: String { "Join_Requests".lowercased() }
     
-    @Column("users_id")
+    @ID(custom: "id", generatedBy: .database)
+    var id: Int64?
+    
+    @Timestamp(key: "created_at", on: .create)
+    public var createdAt: Date?
+    @Timestamp(key: "updated_at", on: .update)
+    public var updatedAt: Date?
+    
+    @Field(key: "users_id")
     var usersId: Int64
     
-    @Column("chats_id")
+    @Field(key: "chats_id")
     var chatsId: Int64
     
-    @Column("element")
+    @Field(key: "element")
     var element: String
     
-    /// See `Table`
     init() {}
     
     init(usersId: Int64, chatsId: Int64, element: String, updatedAt: Date = Date()) {
@@ -41,78 +43,71 @@ final class JoinRequests: Table {
 
 ////// MARK: Queries
 extension JoinRequests {
-
+    
+    static func create(
+        usersId: Int64,
+        chatsId: Int64,
+        element: String,
+        db: any Database
+    ) async throws {
+        let object: JoinRequests = .init(
+            usersId: usersId,
+            chatsId: chatsId,
+            element: element
+        )
+        try await object.create(on: db)
+    }
+    
     @discardableResult
-    static func updateOrCreate(usersId: Int64,
-                               chatsId: Int64,
-                               element: String
+    static func updateOrCreate(
+        usersId: Int64,
+        chatsId: Int64,
+        element: String,
+        db: any Database
     ) async throws -> JoinRequests {
-        return try await app.postgres.transaction(to: .default) { conn in
-            var object: JoinRequests!
-            object = try await SwifQL.select(
-                 \JoinRequests.$id,
-                 \JoinRequests.$usersId,
-                 \JoinRequests.$chatsId,
-                 \JoinRequests.$element,
-                 \JoinRequests.$updatedAt,
-                 \JoinRequests.$createdAt
-            ).from(JoinRequests.table)
-                .where(\JoinRequests.$usersId == usersId &&
-                        \JoinRequests.$chatsId == chatsId
-                )
-                .execute(on: conn)
-                .first(decoding: JoinRequests.self)
-
-            if object == nil {
-                object = .init(usersId: usersId, chatsId: chatsId, element: element)
-                return try await object.insert(on: conn)
+        try await db.transaction { db in
+            let object = try await db.query(JoinRequests.self)
+                .filter(\.$usersId == usersId)
+                .filter(\.$chatsId == chatsId)
+                .first()
+            if object != nil {
+                object!.usersId = usersId
+                object!.chatsId = chatsId
+                object!.element = element
+                try await object!.save(on: db)
             } else {
-                object.element = element
-                return try await object.upsert(conflictColumn: \JoinRequests.$id, on: conn)
+                try await create(
+                    usersId: usersId,
+                    chatsId: chatsId,
+                    element: element,
+                    db: db
+                )
             }
+            return try await get(\.$usersId == usersId, \.$chatsId == chatsId, db: db)!
         }
     }
     
-    static func checkElement(usersId: Int64,
-                             chatsId: Int64,
-                             element: String
+    static func checkElement(
+        usersId: Int64,
+        chatsId: Int64,
+        element: String,
+        db: any Database
     ) async throws -> Bool {
-        return try await app.postgres.transaction(to: .default) { conn in
-            var object: JoinRequests?
-            object = try await SwifQL.select(
-                 \JoinRequests.$id,
-                 \JoinRequests.$usersId,
-                 \JoinRequests.$chatsId,
-                 \JoinRequests.$element,
-                 \JoinRequests.$updatedAt,
-                 \JoinRequests.$createdAt
-            ).from(JoinRequests.table)
-                .where(\JoinRequests.$usersId == usersId &&
-                        \JoinRequests.$chatsId == chatsId
-                )
-                .execute(on: conn)
-                .first(decoding: JoinRequests.self)
-
+        try await db.transaction { db in
+            let object = try await db.query(JoinRequests.self)
+                .filter(\.$usersId == usersId)
+                .filter(\.$chatsId == chatsId)
+                .first()
+            
             return (object?.element ?? "") == element
         }
     }
     
-    static func get(_ predicates: SwifQLable) async throws -> JoinRequests? {
-        return try await app.postgres.transaction(to: .default) { conn in
-            var object: JoinRequests?
-            object = try await SwifQL.select(
-                 \JoinRequests.$id,
-                 \JoinRequests.$usersId,
-                 \JoinRequests.$chatsId,
-                 \JoinRequests.$element,
-                 \JoinRequests.$updatedAt,
-                 \JoinRequests.$createdAt
-            ).from(JoinRequests.table)
-                .where(predicates)
-                .execute(on: conn)
-                .first(decoding: JoinRequests.self)
-
-            return object
+    static func get(_ predicates: ModelValueFilter<JoinRequests>..., db: any Database) async throws -> JoinRequests? {
+        var builder: QueryBuilder<JoinRequests> = db.query(JoinRequests.self)
+        for predicate in predicates {
+            builder = builder.filter(predicate)
         }
+        return try await builder.first()
     }
 }
