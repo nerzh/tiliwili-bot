@@ -26,8 +26,7 @@ public func configure(_ app: Application, _ env: Environment) async throws {
     try await configureDataBase(app)
     
     /// BOT
-    let connectionType: TGConnectionType =
-    if app.environment == .production {
+    let connectionType: TGConnectionType = if app.environment == .production {
         .webhook(
             webHookURL: URL.init(
                 string: "\(TG_WEBHOOK_DOMAIN)/\(TGWebHookName)"
@@ -54,18 +53,6 @@ public func configure(_ app: Application, _ env: Environment) async throws {
     await app.botActor.setBot(bot)
     try await MainFlow.addHandlers(app: app)
     try await app.botActor.bot.start()
-    
-    /// set level of debug if you needed
-//    TGBot.log.logLevel = app.logger.logLevel
-//    let bot: TGBot = .init(app: app, botId: TG_BOT_ID)
-//    if env.name == "production" {
-//        await TGBOT.setConnection(try await TGWebHookConnection(bot: bot, webHookURL: "\(TG_WEBHOOK_DOMAIN!)/\(TGWebHookName)"))
-//    } else {
-//        await TGBOT.setConnection(try await TGLongPollingConnection(bot: bot))
-//    }
-//    
-//    try await MainFlow.addHandlers(app: app, connection: TGBOT.connection)
-//    try await TGBOT.connection.start()
     
     /// WATCHERS
     TelegramWatcher.start(checkEverySec: 5 * 60, timeoutSec: 2 * 86400)

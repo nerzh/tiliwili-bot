@@ -28,9 +28,6 @@ targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swi
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-custom-logger", .upToNextMajor(from: "1.1.0")))
 targetDependencies.append(.product(name: "SwiftCustomLogger", package: "swift-custom-logger"))
-
-packageDependencies.append(.package(url: "https://github.com/apple/swift-log", exact: "1.6.1"))
-targetDependencies.append(.product(name: "Logging", package: "swift-log"))
 #else
 packageDependencies.append(.package(url: "https://github.com/vapor/vapor.git", .upToNextMajor(from: "4.57.0")))
 targetDependencies.append(.product(name: "Vapor", package: "vapor"))
@@ -52,9 +49,6 @@ targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swi
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-custom-logger", .upToNextMajor(from: "1.1.0")))
 targetDependencies.append(.product(name: "SwiftCustomLogger", package: "swift-custom-logger"))
-
-packageDependencies.append(.package(url: "https://github.com/apple/swift-log", exact: "1.6.1"))
-targetDependencies.append(.product(name: "Logging", package: "swift-log"))
 #endif
 
 
