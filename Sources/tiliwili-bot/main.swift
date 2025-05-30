@@ -19,6 +19,7 @@ private var env = try Environment.detect()
 try LoggingSystem.bootstrap(from: &env)
 private let eventLoop: EventLoopGroup = MultiThreadedEventLoopGroup(numberOfThreads: System.coreCount == 1 ? System.coreCount * 2 : System.coreCount)
 let app: Application = try await Application.make(env, Application.EventLoopGroupProvider.shared(eventLoop))
+app.logger = setupLogger(label: "Tiliwili", level: .debug)
 // This attempts to install NIO as the Swift Concurrency global executor.
 // You should not call any async functions before this point.
 private let executorTakeoverSuccess = NIOSingletons.unsafeTryInstallSingletonPosixEventLoopGroupAsConcurrencyGlobalExecutor()
