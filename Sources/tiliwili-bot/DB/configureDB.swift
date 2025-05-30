@@ -10,6 +10,17 @@ import FluentPostgresDriver
 import Vapor
 
 func configureDataBase(_ app: Application) async throws {
+    /// CHECK EXISTS OR CREATE DATABASE
+    try await prepareDB(
+        app: app,
+        host: PG_HOST,
+        port: PG_PORT,
+        user: PG_USER,
+        password: PG_USER,
+        dbName: PG_DB_NAME
+    )
+    
+    /// CONNECT TO DATABASE
     app.databases.use(
         .postgres(
             configuration: .init(
@@ -26,15 +37,6 @@ func configureDataBase(_ app: Application) async throws {
         ),
         as: DatabaseID(string: "default"),
         isDefault: true
-    )
-    
-    try await prepareDB(
-        app: app,
-        host: PG_HOST,
-        port: PG_PORT,
-        user: PG_USER,
-        password: PG_USER,
-        dbName: PG_DB_NAME
     )
 
     try await migrations(app)
@@ -62,7 +64,9 @@ private func prepareDB(app: Application, host: String, port: Int, user: String, 
         isDefault: false
     )
     
-    guard let db = app.databases.database(defaultPostgresDatabaseID, logger: app.logger, on: app.databases.eventLoopGroup.any()) as? SQLDatabase else {
+    guard
+        let db = app.databases.database(defaultPostgresDatabaseID, logger: app.logger, on: app.databases.eventLoopGroup.any()) as? SQLDatabase
+    else {
         throw AppError("DatabaseID \(defaultPostgresDatabaseID)")
     }
 
