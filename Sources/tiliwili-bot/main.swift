@@ -31,6 +31,6 @@ do {
     app.logger.critical("2 - error: \(String(reflecting: error))")
     try? await app.asyncShutdown()
 }
-app.logger.info("begin app app.execute()...")
+app.logger.notice("begin app app.execute()...")
 try await app.execute()
 try await app.asyncShutdown()

@@ -22,12 +22,12 @@ nonisolated(unsafe) var PG_DB_NAME: String = ""
 nonisolated(unsafe) var PG_DB_CONNECTIONS: Int = 5
 
 
-nonisolated(unsafe) var TG_BOT_ID: String!
-nonisolated(unsafe) var TG_WEBHOOK_DOMAIN: String!
+nonisolated(unsafe) var TG_BOT_ID: String = ""
+nonisolated(unsafe) var TG_WEBHOOK_DOMAIN: String = ""
 
 func getAllEnvConstants() throws {
     let projectPath = app.directory.workingDirectory
-    print("Project working directory: \(projectPath)")
+    app.logger.notice("Project working directory: \(projectPath)")
     
     let env = try Environment.detect()
     if env.name == "production" {
@@ -51,7 +51,9 @@ func getAllEnvConstants() throws {
     guard
             let dbPortString = Environment.get("PG_PORT"),
             let variable_11 = Int(dbPortString)
-    else { fatalError("Set PG_PORT to \((try? Environment.detect().name) ?? ".env.\(env.name)")") }
+    else {
+        fatalError("Set PG_PORT to \((try? Environment.detect().name) ?? ".env.\(env.name)")")
+    }
     PG_PORT = variable_11
     
     guard let variable_12 = Environment.get("PG_USER") else { fatalError("Set PG_USER to .env.\(env.name)") }

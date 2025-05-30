@@ -11,8 +11,6 @@ import Vapor
 import SwiftExtensionsPack
 
 public func configure(_ app: Application, _ env: Environment) async throws {
-    let env = try Environment.detect()
-    
     /// GET ENV
     try getAllEnvConstants()
     
