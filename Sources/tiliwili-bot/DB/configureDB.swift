@@ -16,7 +16,7 @@ func configureDataBase(_ app: Application) async throws {
         host: PG_HOST,
         port: PG_PORT,
         user: PG_USER,
-        password: PG_USER,
+        password: PG_PSWD,
         dbName: PG_DB_NAME
     )
     
