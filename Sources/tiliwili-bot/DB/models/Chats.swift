@@ -8,7 +8,7 @@
 import Foundation
 import Fluent
 import FluentPostgresDriver
-@preconcurrency import SwiftTelegramSdk
+import SwiftTelegramBot
 
 
 final class Chats: Model, @unchecked Sendable {

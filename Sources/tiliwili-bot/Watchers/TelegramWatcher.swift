@@ -7,7 +7,7 @@
 
 import Foundation
 import SwiftExtensionsPack
-@preconcurrency import SwiftTelegramSdk
+import SwiftTelegramBot
 import Fluent
 import FluentPostgresDriver
 
@@ -27,15 +27,15 @@ final class TelegramWatcher {
                                 guard
                                     let user: Users = try await Users.get(\Users.$id == object.usersId, db: db)
                                 else {
-                                    throw makeError(AppError("User not found"))
+                                    throw AppError("User not found")
                                 }
                                 guard
                                     let chat: Chats = try await Chats.get(\Chats.$id == object.chatsId, db: db)
                                 else {
-                                    throw makeError(AppError("Chat not found"))
+                                    throw AppError("Chat not found")
                                 }
                                 try? await JoinRequestDispatcher.updateDBIfDecline(userId: user.chatId, chatId: chat.chatId)
-                                try await app.botActor.bot.declineChatJoinRequest(params: .init(chatId: .chat(chat.chatId), userId: user.chatId))
+                                try await app.bot.declineChatJoinRequest(params: .init(chatId: .chat(chat.chatId), userId: user.chatId))
                             }
                         }
                     }

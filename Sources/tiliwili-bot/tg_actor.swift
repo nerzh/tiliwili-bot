@@ -7,27 +7,14 @@
 
 import Foundation
 import Vapor
-import SwiftTelegramSdk
-
-actor TGBotActor {
-    private var _bot: TGBot!
-
-    var bot: TGBot {
-        self._bot
-    }
-    
-    func setBot(_ bot: TGBot) {
-        self._bot = bot
-    }
-}
-
+import SwiftTelegramBot
 
 extension Application {
     private struct TGServiceServiceKey: StorageKey {
-        typealias Value = TGBotActor
+        typealias Value = TGBot
     }
 
-    var botActor: TGBotActor {
+    var bot: TGBot {
         get {
             guard let service = storage[TGServiceServiceKey.self] else {
                 fatalError("TGBot not configured. Use app.bot = ...")

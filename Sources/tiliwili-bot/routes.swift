@@ -6,7 +6,7 @@
 ////
 //
 import Vapor
-import SwiftTelegramSdk
+import SwiftTelegramBot
 
 func routes(_ app: Application) throws {
     try app.register(collection: TelegramController())

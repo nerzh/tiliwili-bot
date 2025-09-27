@@ -17,14 +17,11 @@ targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.10.0")))
 targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
-targetDependencies.append(.product(name: "SwiftTelegramSdk", package: "swift-telegram-sdk"))
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-bot.git", .upToNextMajor(from: "4.2.2")))
+targetDependencies.append(.product(name: "SwiftTelegramBot", package: "swift-telegram-bot"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.0.3")))
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.1.0")))
 targetDependencies.append(.product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"))
-
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")))
-targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swift-regular-expression"))
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-custom-logger", .upToNextMajor(from: "1.1.0")))
 targetDependencies.append(.product(name: "SwiftCustomLogger", package: "swift-custom-logger"))
@@ -38,14 +35,11 @@ targetDependencies.append(.product(name: "Fluent", package: "fluent"))
 packageDependencies.append(.package(url: "https://github.com/vapor/fluent-postgres-driver", .upToNextMajor(from: "2.10.0")))
 targetDependencies.append(.product(name: "FluentPostgresDriver", package: "fluent-postgres-driver"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-sdk.git", .upToNextMajor(from: "3.9.2")))
-targetDependencies.append(.product(name: "SwiftTelegramSdk", package: "swift-telegram-sdk"))
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-telegram-bot.git", .upToNextMajor(from: "4.2.2")))
+targetDependencies.append(.product(name: "SwiftTelegramBot", package: "swift-telegram-bot"))
 
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.0.3")))
+packageDependencies.append(.package(url: "https://github.com/nerzh/swift-extensions-pack.git", .upToNextMajor(from: "2.1.0")))
 targetDependencies.append(.product(name: "SwiftExtensionsPack", package: "swift-extensions-pack"))
-
-packageDependencies.append(.package(url: "https://github.com/nerzh/swift-regular-expression.git", .upToNextMajor(from: "0.2.3")))
-targetDependencies.append(.product(name: "SwiftRegularExpression", package: "swift-regular-expression"))
 
 packageDependencies.append(.package(url: "https://github.com/nerzh/swift-custom-logger", .upToNextMajor(from: "1.1.0")))
 targetDependencies.append(.product(name: "SwiftCustomLogger", package: "swift-custom-logger"))

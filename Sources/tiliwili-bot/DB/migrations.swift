@@ -20,7 +20,6 @@ func migrations(_ app: Application) async throws {
         
         try await app.autoMigrate()
     } catch {
-        print(String(reflecting: error))
-        throw AppError(error, logLevel: .error)
+        throw AppError(error, errorLevel: .debug)
     }
 }

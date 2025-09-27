@@ -7,7 +7,7 @@
 
 import Foundation
 import Vapor
-@preconcurrency import SwiftTelegramSdk
+import SwiftTelegramBot
 import SwiftExtensionsPack
 
 public func configure(_ app: Application, _ env: Environment) async throws {
@@ -33,26 +33,23 @@ public func configure(_ app: Application, _ env: Environment) async throws {
             )!
         )
     } else {
-        .longpolling(
-            limit: nil,
-            timeout: nil,
-            allowedUpdates: nil
-        )
+        .longpolling()
     }
     
-    let bot: TGBot = try await .init(
+    app.bot = try await .init(
         connectionType: connectionType,
-        dispatcher: nil,
-        tgClient: VaporTGClient(client: app.client),
+        tgClient: TGClientDefault(),
         tgURI: TGBot.standardTGURL,
         botId: TG_BOT_ID,
         log: app.logger
     )
     
-    app.botActor = .init()
-    await app.botActor.setBot(bot)
-    try await MainFlow.addHandlers(app: app)
-    try await app.botActor.bot.start()
+    try await app.bot.add(
+        JoinRequestDispatcher(bot: app.bot, logger: app.logger),
+        DeleteKoreanMessageDispatcher(bot: app.bot, logger: app.logger),
+        TestDispatcher(bot: app.bot, logger: app.logger)
+    )
+    try await app.bot.start()
     
     /// WATCHERS
     TelegramWatcher.start(checkEverySec: 5 * 60, timeoutSec: 2 * 86400)
