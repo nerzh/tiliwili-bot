@@ -12,7 +12,7 @@ import SwiftExtensionsPack
 import Fluent
 import FluentPostgresDriver
 
-final class DeleteKoreanMessageDispatcher: TGDefaultDispatcher, Sendable, @unchecked Sendable {
+final class DeleteKoreanMessageDispatcher: TGDefaultDispatcher, @unchecked Sendable {
     
     override
     func handle() async {
