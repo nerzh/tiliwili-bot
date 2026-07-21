@@ -6,7 +6,6 @@
 //
 
 import Foundation
-import SwiftExtensionsPack
 import SwiftTelegramBot
 import Fluent
 import FluentPostgresDriver
@@ -14,34 +13,55 @@ import FluentPostgresDriver
 final class TelegramWatcher {
     
     class func start(checkEverySec: UInt32, timeoutSec: Int64) {
-        Thread {
-            while true {
-                Task.detached {
-                    try await app.db.transaction { db in
-                        let objects: [JoinRequests] = try await db.query(JoinRequests.self).all()
-                        
-                        for object in objects {
-                            pe("\(Date().toSeconds()) - \(object.updatedAt!.toSeconds())", (Date().toSeconds() - object.updatedAt!.toSeconds()) >= timeoutSec)
-                            
-                            if (Date().toSeconds() - object.updatedAt!.toSeconds()) >= timeoutSec {
-                                guard
-                                    let user: Users = try await Users.get(\Users.$id == object.usersId, db: db)
-                                else {
-                                    throw AppError("User not found")
-                                }
-                                guard
-                                    let chat: Chats = try await Chats.get(\Chats.$id == object.chatsId, db: db)
-                                else {
-                                    throw AppError("Chat not found")
-                                }
-                                try? await JoinRequestDispatcher.updateDBIfDecline(userId: user.chatId, chatId: chat.chatId)
-                                try await app.bot.declineChatJoinRequest(params: .init(chatId: .chat(chat.chatId), userId: user.chatId))
+        Task.detached {
+            while !Task.isCancelled {
+                do {
+                    let requests: [JoinRequests] = try await app.db.query(JoinRequests.self).all()
+                    let expirationDate = Date().addingTimeInterval(-TimeInterval(timeoutSec))
+
+                    for request in requests {
+                        guard let updatedAt = request.updatedAt else {
+                            app.logger.error("Join request \(request.id?.description ?? "unknown") has no updated_at value")
+                            continue
+                        }
+                        guard updatedAt <= expirationDate else { continue }
+
+                        do {
+                            guard
+                                let user: Users = try await Users.get(\Users.$id == request.usersId, db: app.db)
+                            else {
+                                throw AppError("User not found for join request \(request.id?.description ?? "unknown")")
                             }
+                            guard
+                                let chat: Chats = try await Chats.get(\Chats.$id == request.chatsId, db: app.db)
+                            else {
+                                throw AppError("Chat not found for join request \(request.id?.description ?? "unknown")")
+                            }
+
+                            try await app.bot.declineChatJoinRequest(
+                                params: .init(chatId: .chat(chat.chatId), userId: user.chatId)
+                            )
+                            try await JoinRequestDispatcher.updateDBIfDecline(
+                                userId: user.chatId,
+                                chatId: chat.chatId
+                            )
+                            app.logger.info("Expired join request declined: user_id=\(user.chatId), chat_id=\(chat.chatId)")
+                        } catch {
+                            app.logger.error(
+                                "Failed to decline expired join request \(request.id?.description ?? "unknown"): \(String(reflecting: error))"
+                            )
                         }
                     }
+                } catch {
+                    app.logger.error("Failed to load join requests: \(String(reflecting: error))")
                 }
-                sleep(checkEverySec)
+
+                do {
+                    try await Task.sleep(for: .seconds(checkEverySec))
+                } catch {
+                    break
+                }
             }
-        }.start()
+        }
     }
 }

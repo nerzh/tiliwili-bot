@@ -44,8 +44,8 @@ final class JoinRequestDispatcher: TGDefaultDispatcher, @unchecked Sendable {
                     /// try await bot.sendMessage(params: TGSendMessageParams(chatId: .chat(message.chat.id), text: "Your response has been approved."))
                 }
             } else {
-                try await Self.updateDBIfDecline(userId: userId, chatId: chatId)
                 try await self.bot.declineChatJoinRequest(params: .init(chatId: .chat(chatId), userId: userId))
+                try await Self.updateDBIfDecline(userId: userId, chatId: chatId)
                 if let message = callbackQuery.message {
                     try await self.bot.deleteMessage(params: TGDeleteMessageParams(chatId: .chat(message.chat.id), messageId: message.messageId))
                     /// bot can't initiate conversation with a user
@@ -156,6 +156,6 @@ final class JoinRequestDispatcher: TGDefaultDispatcher, @unchecked Sendable {
             throw AppError("JoinRequests not found")
         }
         try await request.delete(on: app.db)
-        try await ChatsUsers.updateOrCreate(usersId: chat.id!, chatsId: user.id!, approved: false, banned: false, db: app.db)
+        try await ChatsUsers.updateOrCreate(usersId: user.id!, chatsId: chat.id!, approved: false, banned: false, db: app.db)
     }
 }
